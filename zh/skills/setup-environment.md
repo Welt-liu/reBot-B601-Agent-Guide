@@ -1,5 +1,7 @@
 # 环境初始化
 
+> **注意：当前 Agent Skill 为测试版本，仅供参考。如有任何疑问或遇到问题，请联系 Seeed 获取支持。**
+
 ## 第一步：安装 Miniforge
 
 支持平台：Windows / Ubuntu / macOS / Jetson / 树莓派
