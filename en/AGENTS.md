@@ -19,15 +19,17 @@ Please confirm which form of robotic arm you have:
 
 Run the [Setup Environment Skill](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/skills/en/setup-environment.md) to complete the following:
 
-- [ ] Miniforge installation
-- [ ] motorbridge configuration
-- [ ] Gateway installation
+- [ ] Python environment setup (Miniforge or existing Python)
+- [ ] motorbridge installation
+- [ ] Platform-specific configuration (Linux: configure can0, Windows: install PCAN-USB driver)
 
-After completion, ensure the virtual environment is activated:
+After completion, verify motorbridge-cli is available:
 
 ```bash
-conda activate rebot
+motorbridge-cli --help
 ```
+
+> **Windows users**: No need to create a conda environment or configure can0. Use existing Python + `pip install motorbridge`. The `motorbridge-cli` executable is located in the `Scripts` directory of your Python installation.
 
 ---
 
@@ -37,11 +39,12 @@ Run the [Write Motor ID Skill](https://github.com/Welt-liu/reBot-B601-RS-Skills/
 
 This Skill will automatically:
 
-1. **Identify the USB-CAN adapter** (PCAN-USB, configure `can0` at bitrate `1000000`)
+1. **Identify the USB-CAN adapter** (PCAN-USB; Linux: configure `can0` at bitrate `1000000`, Windows: driver auto-detects)
 2. **Set motor IDs one by one** (7 motors total, ID range 1–7)
    - Connect only one motor at a time
-   - Scan to confirm the current motor ID (default: 127)
+   - Scan to confirm the current motor ID (default: 127, some batches pre-set to 1–7)
    - Modify to the user-specified target ID
+   - > **Note**: robstride `id-set` may report `store_parameters failed` timeout error — the ID is actually written, verify by scanning
 3. **Final verification** — Scan to confirm all motor IDs (1–7) are correctly written
 
 ---

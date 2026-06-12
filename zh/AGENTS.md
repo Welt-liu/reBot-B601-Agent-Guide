@@ -19,15 +19,17 @@
 
 运行 [环境初始化Skill](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/skills/setup-environment.md) 完成以下安装：
 
-- [ ] Miniforge 安装
-- [ ] motorbridge 配置
-- [ ] Gateway 安装
+- [ ] Python 环境准备（Miniforge 或已有 Python）
+- [ ] motorbridge 安装
+- [ ] 平台特定配置（Linux 配置 can0，Windows 安装 PCAN-USB 驱动）
 
-完成后确保已激活虚拟环境：
+完成后确保 motorbridge-cli 可用：
 
 ```bash
-conda activate rebot
+motorbridge-cli --help
 ```
+
+> **Windows 用户**：不需要创建 conda 环境或配置 can0。使用已有 Python + pip install motorbridge 即可，安装完成后 `motorbridge-cli` 位于 Python 安装目录的 `Scripts` 文件夹下。
 
 ---
 
@@ -37,11 +39,12 @@ conda activate rebot
 
 该 Skill 会自动完成：
 
-1. **识别 USB-CAN 转接板**（PCAN-USB，配置 `can0`，bitrate `1000000`）
+1. **识别 USB-CAN 转接板**（PCAN-USB；Linux 配置 `can0` bitrate `1000000`，Windows 驱动自动识别）
 2. **逐颗电机设置 ID**（共 7 颗电机，ID 范围 1–7）
    - 每次仅连接一颗电机
-   - 扫描确认当前电机 ID（默认 127）
+   - 扫描确认当前电机 ID（默认 127，部分批次已预设为 1~7）
    - 修改为用户指定的目标 ID
+   - > **注意**：robstride 电机 `id-set` 命令可能报 `store_parameters failed` 超时错误，实际写入已生效，扫描确认即可
 3. **最终检查** — 扫描确认所有电机 ID（1–7）均已正确写入
 
 ---

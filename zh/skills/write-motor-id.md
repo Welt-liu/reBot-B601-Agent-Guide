@@ -5,15 +5,19 @@
 
 ## 使用前提
 
-已完成 `/setup-env` Skill，安装 motorbridge 及依赖。
+已完成 `/setup-env` Skill 或 motorbridge 已安装。
 
-执行命令前需要激活虚拟环境：
+执行前先验证 motorbridge-cli 可用：
 
 ```bash
-conda activate rebot      # 或使用你实际创建的环境名，如 lerobot
+motorbridge-cli --help 2>/dev/null || echo "motorbridge-cli not found"
 ```
 
-> 扫描电机时如果没有上电是没有回应的，扫描失败时需要提示用户是否已上电。
+如果未找到命令：
+- Linux/macOS：确认 conda 环境已激活（`conda activate rebot`）
+- Windows：使用完整路径，如 `<Python安装目录>\Scripts\motorbridge-cli.exe`
+
+> **重要：扫描电机时电机必须上电（RS 为 48V，DM 为 24V），否则不会有任何响应。** 扫描失败时首先提示用户确认是否已上电。
 
 ## 确认设备类型
 
@@ -21,8 +25,20 @@ conda activate rebot      # 或使用你实际创建的环境名，如 lerobot
 
 | 类型 | 连接方式 | 说明 |
 |------|----------|------|
-| robstride（灵足） | USB-CAN（PCAN-USB） | 通过 socketcan `can0` 通信，仅修改 device_id，feedback_id 不变 |
-| damiao（达妙） | USB 串口 | 通过 `/dev/ttyACM0` 通信，需同时修改 ESC_ID 和 MST_ID |
+| robstride（灵足） | USB-CAN（PCAN-USB） | Linux 通过 socketcan `can0` 通信；Windows 驱动自动识别 |
+| damiao（达妙） | USB 串口 | Linux 通过 `/dev/ttyACM0` 通信；Windows 通过 `COMx` |
+
+## CLI 命令路径约定
+
+下文中所有命令使用 `motorbridge-cli` 作为命令名。实际操作时：
+
+- **Linux/macOS**（已激活 conda 环境）：直接运行 `motorbridge-cli`
+- **Windows**（使用系统 Python）：替换为完整路径，例如：
+  ```
+  <Python安装目录>\Scripts\motorbridge-cli.exe
+  ```
+
+---
 
 ## 达妙 vs 灵足 ID 写入区别
 
@@ -30,7 +46,7 @@ conda activate rebot      # 或使用你实际创建的环境名，如 lerobot
 |---|---|---|
 | 设备 ID 寄存器 | `ESC_ID`（rid=8） | `device_id` |
 | 反馈 ID 寄存器 | `MST_ID`（rid=7） | `host_id`（不修改） |
-| 默认设备 ID | `0x01` | `127`（0x7F） |
+| 默认设备 ID | `0x01` | `127`（0x7F），但部分批次可能已预设为 1~7 |
 | 默认反馈 ID | `0x11`（= motor_id + 0x10） | `0xFD`（固定值） |
 | 改 ID 时是否改反馈 ID | **是**，`feedback_id = motor_id + 0x10` | **否**，仅改 device_id |
 | 参数 | `--motor-id` / `--new-motor-id` + `--feedback-id` / `--new-feedback-id` | `--motor-id` / `--new-motor-id` |
@@ -42,7 +58,9 @@ conda activate rebot      # 或使用你实际创建的环境名，如 lerobot
 
 ## 第一步：设备初始化
 
-### robstride（USB-CAN）
+根据操作系统和设备类型完成初始化。
+
+### Linux — robstride（USB-CAN）
 
 ```bash
 # 加载 PCAN-USB 驱动
@@ -58,27 +76,20 @@ sudo ip link set can0 up
 ip -br link show can0
 ```
 
-### damiao（USB 串口）
+### Windows — robstride（USB-CAN）
 
-1. 确认串口设备存在：
+PCAN-USB 驱动安装后自动可用，**不需要配置 can0**。确认 PCAN-USB 已插入即可。
 
-```bash
-ls -l /dev/ttyACM0
-```
+### Linux — damiao（USB 串口）
 
-2. 检查权限。输出应为 `crw-rw----` 且组为 `dialout`，确认当前用户在该组：
+1. 确认串口设备存在：`ls -l /dev/ttyACM0`
+2. 确认用户在 `dialout` 组：`groups`
+3. 如不在组中：`sudo usermod -aG dialout $USER`（需重新登录生效）
 
-```bash
-groups
-```
+### Windows — damiao（USB 串口）
 
-如果输出中不包含 `dialout`，执行：
-
-```bash
-sudo usermod -aG dialout $USER
-```
-
-> 加入组后需要**重新登录**（或重启）才生效。重新登录后再次确认 `groups` 输出包含 `dialout`，否则无法访问串口。
+1. 在设备管理器中确认 COM 端口号
+2. 后续命令中 `--serial-port` 参数使用 `COMx`（如 `COM3`）
 
 ---
 
@@ -86,12 +97,14 @@ sudo usermod -aG dialout $USER
 
 根据设备类型执行对应命令：
 
-**robstride：**
+**robstride（Linux）：**
 ```bash
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 8
 ```
 
-**damiao：**
+**robstride（Windows）：** 同上命令，但使用完整 CLI 路径，无需 `--channel` 参数（驱动自动识别）
+
+**damiao（Linux）：**
 ```bash
 motorbridge-cli scan \
     --vendor damiao \
@@ -102,8 +115,11 @@ motorbridge-cli scan \
     --end-id 32
 ```
 
-- **robstride** 如果命中 1～7 号电机，提示用户当前机械臂可能为成品版本，不需要修改 ID，本 Skill 无需执行。
-- **damiao** 根据命中的 ID 判断是否需要修改。
+**damiao（Windows）：** 将 `--serial-port /dev/ttyACM0` 替换为 `--serial-port COMx`
+
+判断逻辑：
+- **robstride** 如果命中 1～7 号电机，提示用户当前机械臂可能为成品版本，不需要修改 ID，本 Skill 无需执行
+- **damiao** 根据命中的 ID 判断是否需要修改
 
 ---
 
@@ -111,17 +127,24 @@ motorbridge-cli scan \
 
 ### 连接新电机
 
-1. 要求用户断电后拔掉当前电机上的线
+1. 要求用户**断电后**拔掉当前电机上的线
 2. 将线连接到下一颗电机
-3. 等待用户接上电源后，执行**查找当前电机 ID**
+3. **开启电源**（RS 为 48V，DM 为 24V；电机必须上电才能通信）
+4. 等待用户确认上电后，执行**查找当前电机 ID**
 
 ### 查找当前电机 ID
 
 执行前要求用户**只能连接一颗电机**。
 
+> **扫描策略：同时扫描出厂默认范围和 1~7 范围。** 部分批次电机出厂时 ID 可能已预设为 1~7，而非默认值 127。
+
 **robstride：**
 ```bash
-motorbridge-cli scan --vendor robstride --channel can0 --start-id 126 --end-id 127
+# 先扫 1~7（可能已预设）
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 300
+
+# 再扫 126~127（出厂默认）
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 126 --end-id 127 --timeout-ms 300
 ```
 
 **damiao：**
@@ -136,13 +159,14 @@ motorbridge-cli scan \
 ```
 
 - **robstride** 命中 **127**：说明电机未设置过 ID，进入**修改当前电机 ID**步骤
+- **robstride** 命中 **1~7 中某个值**：说明已预设 ID。如果该值正好是目标 ID，这颗电机已完成；否则询问用户是否需要重新修改
 - **damiao** 命中 **0x01**：说明电机未设置过 ID，进入**修改当前电机 ID**步骤
-- **未命中默认 ID**：扩大扫描范围（1～32），若命中其中某个 ID，说明用户已设置过该电机。提示用户命中的 ID，询问是否需要重新修改
-- **命中多个电机**：异常状态，说明同时连接了多个电机，要求用户在断电后拔掉多余电机。
+- **未命中默认 ID**：扩大扫描范围（1~32 或 1~50），若命中某个 ID，提示用户并询问是否需要重新修改
+- **未命中任何电机**：提示用户检查：① 电源是否已开启（RS 48V / DM 24V）② CAN 线/串口是否连接牢固 ③ 电机是否故障
 
 ### 修改当前电机 ID
 
-确认命中默认 ID 后，要求用户给出新的 motor ID，填入 CLI 参数中：
+确认电机当前 ID 后，执行修改命令：
 
 **robstride：**
 ```bash
@@ -164,7 +188,9 @@ motorbridge-cli id-set \
     --new-feedback-id 0x11
 ```
 
-写入成功后 CLI 会输出类似以下内容：
+> **robstride id-set 超时说明**：执行 `id-set` 后可能出现 `store_parameters failed: response ack timeout` 错误（exit code 2）。这是因为电机写入后重启导致确认超时，**ID 实际已写入成功**。出现此错误后不要重试，直接执行**扫描确认**验证 ID 是否已变更。
+
+写入成功后，达妙电机会输出类似以下内容：
 
 ```
 write rid=7 (MST_ID) <= 0x11
@@ -177,15 +203,29 @@ verify ok
 
 > 达妙电机修改 ID 后会重启，命令末尾可能出现 `get_register_u32 failed` 超时提示。这表示验证失败，需要立即执行**扫描**确认 ID 是否实际写入成功，如未成功则重新修改。
 
+### 扫描确认
+
+修改完成后立即扫描确认：
+
+```bash
+# robstride：扫描旧 ID 和新 ID
+motorbridge-cli scan --vendor robstride --channel can0 --start-id <新ID> --end-id <新ID> --timeout-ms 300
+
+# damiao：同上，加上传输参数
+```
+
+- 如果新 ID 命中、旧 ID 无响应 → 修改成功
+- 如果旧 ID 仍然命中 → 修改失败，重新执行 `id-set`
+
 ---
 
 ## 第四步：最后确认
 
-根据设备类型执行对应命令：
+所有 7 颗电机设置完成后，将所有电机同时连接到 CAN 总线/串口，执行最终扫描：
 
 **robstride：**
 ```bash
-motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 8
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 500
 ```
 
 **damiao：**
@@ -202,11 +242,10 @@ motorbridge-cli scan \
 扫描成功后 CLI 会输出类似以下内容：
 
 ```
-[hit] vendor=damiao probe=0x01 esc_id=0x1 mst_id=0x11
-[.. ] vendor=damiao probe=0x02 no reply
+[hit] probe=0x01 vendor=robstride via=ping feedback_id=0xFD device_id=1 responder_id=254
+[hit] probe=0x02 vendor=robstride via=ping feedback_id=0xFD device_id=2 responder_id=254
 ...
-scan done: 1 motor(s) found
-  probe=0x01 vendor=damiao esc_id=0x1 mst_id=0x11
+scan done: 7 motor(s) found
 ```
 
-告知用户命中了哪些电机。用户确认无误后，本 Skill 执行完成；否则返回重新修改。
+告知用户命中了哪些电机。用户确认 ID 1~7 全部正确后，本 Skill 执行完成；如有缺失则返回对应电机重新修改。
