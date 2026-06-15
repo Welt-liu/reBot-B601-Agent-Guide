@@ -5,7 +5,7 @@
 
 ## 使用前提
 
-已完成 `/setup-env` Skill 或 motorbridge 已安装。
+已完成 `/setup-environment` Skill 或 motorbridge 已安装。
 
 执行前先验证 motorbridge-cli 可用：
 
@@ -15,9 +15,31 @@ motorbridge-cli --help 2>/dev/null || echo "motorbridge-cli not found"
 
 如果未找到命令：
 - Linux/macOS：确认 conda 环境已激活（`conda activate rebot`）
-- Windows：使用完整路径，如 `<Python安装目录>\Scripts\motorbridge-cli.exe`
+- Windows：使用完整路径，如 `<miniforge_path>\envs\rebot\Scripts\motorbridge-cli.exe`
 
 > **重要：扫描电机时电机必须上电（RS 为 48V，DM 为 24V），否则不会有任何响应。** 扫描失败时首先提示用户确认是否已上电。
+
+## 执行前信息收集
+
+在开始扫描之前，**必须先向用户确认以下信息**：
+
+| 信息 | 说明 | 示例 |
+| --- | --- | --- |
+| 电机类型 | robstride（灵足）或 damiao（达妙） | robstride |
+| 设备版本 | 散件版（需逐个写 ID）或套件版（可能已有 ID） | 散件版 |
+| 目标 ID 范围 | 用户想把电机设成哪些 ID | 1~7 |
+| 硬件连接 | PCAN-USB/串口是否插入、CAN 线是否连接、电机是否上电 | 已连接已上电 |
+| 当前连接数 | 修改 ID 时只能连接一颗电机 | 仅 1 颗 |
+
+> **写入 memory**：收集完上述信息后，追加到 `memory/local-machine-env.md`（如文件中尚无电机相关信息）：
+>
+> ```markdown
+> ## 电机配置
+> - 类型：robstride / damiao
+> - 设备版本：散件版 / 套件版
+> - 目标 ID 范围：1~7
+> - 串口（damiao）：COMx（如适用）
+> ```
 
 ## 确认设备类型
 
@@ -33,10 +55,14 @@ motorbridge-cli --help 2>/dev/null || echo "motorbridge-cli not found"
 下文中所有命令使用 `motorbridge-cli` 作为命令名。实际操作时：
 
 - **Linux/macOS**（已激活 conda 环境）：直接运行 `motorbridge-cli`
-- **Windows**（使用系统 Python）：替换为完整路径，例如：
+
+- **Windows**（conda 环境未加入 PATH）：使用完整路径，例如：
+
   ```
-  <Python安装目录>\Scripts\motorbridge-cli.exe
+  <miniforge_path>\envs\rebot\Scripts\motorbridge-cli.exe
   ```
+
+  或在 conda 环境中先执行 `conda activate rebot` 后直接运行 `motorbridge-cli`
 
 ---
 
@@ -102,7 +128,10 @@ PCAN-USB 驱动安装后自动可用，**不需要配置 can0**。确认 PCAN-US
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 8
 ```
 
-**robstride（Windows）：** 同上命令，但使用完整 CLI 路径，无需 `--channel` 参数（驱动自动识别）
+**robstride（Windows）：** 命令格式与 Linux 相同（仍需 `--channel can0`，PCAN 驱动在底层自动映射）：
+```bash
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 8
+```
 
 **damiao（Linux）：**
 ```bash
@@ -138,14 +167,15 @@ motorbridge-cli scan \
 
 > **扫描策略：同时扫描出厂默认范围和 1~7 范围。** 部分批次电机出厂时 ID 可能已预设为 1~7，而非默认值 127。
 
-**robstride：**
-```bash
-# 先扫 1~7（可能已预设）
-motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 300
+**robstride（Linux / Windows 命令相同）：**
 
-# 再扫 126~127（出厂默认）
+```bash
+# 同时扫描两个范围，根据结果判断电机状态
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 300
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 126 --end-id 127 --timeout-ms 300
 ```
+
+> Windows 下 `--channel can0` 仍然需要，PCAN 驱动在底层自动映射，不需要提前配置 can0 接口。
 
 **damiao：**
 ```bash
@@ -168,10 +198,10 @@ motorbridge-cli scan \
 
 确认电机当前 ID 后，执行修改命令：
 
-**robstride：**
+**robstride（Linux / Windows 命令相同）：**
 ```bash
 # 示例：将 ID 127 改为 5
-motorbridge-cli id-set --vendor robstride --motor-id 127 --new-motor-id 5
+motorbridge-cli id-set --vendor robstride --channel can0 --motor-id 127 --new-motor-id 5
 ```
 
 **damiao：**
@@ -217,13 +247,20 @@ motorbridge-cli scan --vendor robstride --channel can0 --start-id <新ID> --end-
 - 如果新 ID 命中、旧 ID 无响应 → 修改成功
 - 如果旧 ID 仍然命中 → 修改失败，重新执行 `id-set`
 
+> **写入 memory**：每颗电机 ID 设置成功后，追加到 `memory/local-machine-env.md`：
+>
+> ```markdown
+> ### 已设置的电机
+> - ID 1：已确认 ✅
+> ```
+
 ---
 
 ## 第四步：最后确认
 
 所有 7 颗电机设置完成后，将所有电机同时连接到 CAN 总线/串口，执行最终扫描：
 
-**robstride：**
+**robstride（Linux / Windows 命令相同）：**
 ```bash
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 500
 ```
@@ -249,3 +286,11 @@ scan done: 7 motor(s) found
 ```
 
 告知用户命中了哪些电机。用户确认 ID 1~7 全部正确后，本 Skill 执行完成；如有缺失则返回对应电机重新修改。
+
+> **写入 memory**：最终扫描完成后，更新 `memory/local-machine-env.md`：
+>
+> ```markdown
+> ### 电机 ID 设置完成
+> - 已设置 ID：1, 2, 3, 4, 5, 6, 7
+> - 最终扫描时间：YYYY-MM-DD
+> ```

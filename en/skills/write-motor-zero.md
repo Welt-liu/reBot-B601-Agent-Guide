@@ -5,18 +5,57 @@
 ## Prerequisites
 
 - `/write-motor-id` has been completed, motor IDs are correctly set
-- `can0` is configured and UP (configured in Step 1 of motor ID setup)
+- `can0` is configured and UP (Linux needs configuration in `/setup-environment`; Windows does not)
 
 ## Steps
 
 ### 1. Activate Environment and Start Gateway
+
+**Linux:**
 
 ```bash
 conda activate rebot
 motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can0
 ```
 
+**Windows (routing mode recommended):**
+
+```bash
+conda activate rebot
+motorbridge-gateway -- --bind 127.0.0.1:9002
+```
+
+In routing mode, only `--bind` is needed — the web UI will auto-select vendor/channel/ID. To specify a channel explicitly:
+
+```bash
+motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can0
+# or with bitrate
+motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can0@1000000
+```
+
+> **Windows `conda activate` tip**: If you get "CommandNotFoundError", conda hasn't been initialized for this shell. Use Miniforge Prompt, or the full path: `<miniforge_install_path>\Scripts\activate.bat rebot`. Git Bash users see the initialization steps in `/setup-environment`.
+
 Keep the Gateway running — do not close this terminal.
+
+> **Important: The Gateway exclusively occupies the CAN bus**. While the Gateway is running, `motorbridge-cli scan` and other CLI commands will fail to communicate with motors and return `0 motor(s) found`.
+> To scan motor IDs while the Gateway is running, you must stop it first:
+>
+> ```bash
+> # Linux
+> pkill -f ws_gateway
+> ```
+>
+> ```cmd
+> :: Windows cmd
+> taskkill /F /IM motorbridge-gateway.exe
+> ```
+>
+> ```powershell
+> # PowerShell
+> Stop-Process -Name "motorbridge-gateway" -ErrorAction SilentlyContinue
+> ```
+>
+> Restart the Gateway after scanning is complete. It's recommended to complete all CLI scan and motor ID setup work before starting the Gateway.
 
 ### 2. Open Motorbridge Studio
 

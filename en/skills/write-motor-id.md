@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-The `/setup-env` Skill has been completed or motorbridge is already installed.
+The `/setup-environment` Skill has been completed or motorbridge is already installed.
 
 Verify motorbridge-cli is available before proceeding:
 
@@ -102,7 +102,10 @@ Run the appropriate command for your device type:
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 8
 ```
 
-**robstride (Windows):** same command but use full CLI path; `--channel` is optional (driver auto-detects)
+**robstride (Windows):** same command as Linux — `--channel can0` is still required (PCAN driver maps it automatically at the lower level):
+```bash
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 8
+```
 
 **damiao (Linux):**
 ```bash
@@ -168,10 +171,10 @@ motorbridge-cli scan \
 
 After confirming the motor's current ID, execute the modification:
 
-**robstride:**
+**robstride (Linux / Windows, same command):**
 ```bash
 # Example: change ID 127 to 5
-motorbridge-cli id-set --vendor robstride --motor-id 127 --new-motor-id 5
+motorbridge-cli id-set --vendor robstride --channel can0 --motor-id 127 --new-motor-id 5
 ```
 
 **damiao:**
@@ -223,7 +226,7 @@ motorbridge-cli scan --vendor robstride --channel can0 --start-id <new_id> --end
 
 After all 7 motors are configured, connect all motors simultaneously and run a final scan:
 
-**robstride:**
+**robstride (Linux / Windows, same command):**
 ```bash
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 500
 ```

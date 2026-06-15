@@ -2,12 +2,20 @@
 
 > **注意：当前 Agent Skill 为测试版本，仅供参考。如有任何疑问或遇到问题，请联系 Seeed 获取支持。**
 
+## 执行前必读
+
+开始前，先检查 `memory/local-machine-env.md` 是否已有当前机器的环境配置。如果已有 conda 路径和 motorbridge 信息，可直接使用；如果没有或信息不完整，按以下步骤重新初始化。
+
 ## 第零步：检查是否已安装
 
 在开始之前，先检查 motorbridge 是否已安装：
 
 ```bash
+# Linux / macOS / Git Bash：
 motorbridge-cli --help 2>/dev/null || python -m motorbridge --help 2>/dev/null || echo "motorbridge not installed"
+
+# Windows PowerShell（无 2>/dev/null）：
+motorbridge-cli --help *>&1 | Out-Null; if ($LASTEXITCODE -ne 0) { python -m motorbridge *>&1 | Out-Null; if ($LASTEXITCODE -ne 0) { echo "motorbridge not installed" } }
 ```
 
 - 如果输出帮助信息，说明 **motorbridge 已安装**，可跳过第一、二步，直接进入后续 Skill
@@ -19,10 +27,19 @@ motorbridge-cli --help 2>/dev/null || python -m motorbridge --help 2>/dev/null |
 
 ### Linux / macOS / Jetson / 树莓派
 
+> 以下命令在 **bash/zsh** 中执行。
+
 安装 Miniforge：
 
 ```bash
 wget "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3-$(uname)-$(uname -m).sh
+```
+
+如果系统没有 `wget`，改用 `curl`：
+
+```bash
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 bash Miniforge3-$(uname)-$(uname -m).sh
 ```
 
@@ -35,35 +52,71 @@ conda activate rebot
 
 ### Windows
 
-Windows 用户可以选择以下任一方式：
+> 以下命令在 **PowerShell** 中执行。如果使用 Git Bash，可将 PowerShell 的 `Invoke-WebRequest` 替换为 `curl` 命令。
 
-**方式 A：使用 Miniforge（推荐）**
+#### 使用 Miniforge（推荐）
 
-1. 从 [Miniforge 发布页](https://github.com/conda-forge/miniforge/releases) 下载 Windows 安装器并安装
-2. 打开 Anaconda Prompt，执行：
+1. 下载并安装 Miniforge：
 
-```bash
-conda create -y -n rebot python=3.12
-conda activate rebot
-```
+   **PowerShell：**
 
-**方式 B：使用已有 Python 安装**
+   ```powershell
+   Invoke-WebRequest -Uri "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe" -OutFile "Miniforge3-Windows-x86_64.exe"
+   ```
 
-如果已安装 Python 3.10+，可以直接使用。确认 Python 路径：
+   **Git Bash / WSL：**
 
-```bash
-python --version
-```
+   ```bash
+   curl -L -o Miniforge3-Windows-x86_64.exe "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe"
+   ```
 
-确认 Python Scripts 目录在 PATH 中，或在命令中使用完整路径：
-`<Python安装目录>\Scripts\motorbridge-cli.exe`
+2. 双击运行安装器完成安装，然后打开 **Anaconda Prompt**（或 Miniforge Prompt），创建并激活虚拟环境：
+
+> **写入 memory**：安装完成后，记录 Miniforge 实际安装路径到 `memory/local-machine-env.md`：
+>
+> ```markdown
+> ## conda
+> - 安装路径：`F:\miniforge`（Git Bash：`/f/miniforge`）
+> - conda.sh：`/f/miniforge/etc/profile.d/conda.sh`
+> ```
+
+   ```bash
+   conda create -y -n rebot python=3.12 --no-shortcuts
+   conda activate rebot
+   ```
+
+   > 如果 `conda activate` 报错 "CommandNotFoundError: Your shell has not been properly configured"，
+   > 先执行 `conda init cmd.exe`（或 `conda init powershell`），重启终端后再 activate。
+
+   **Git Bash 用户**：如果 `conda` 命令找不到，说明 Git Bash 未加载 conda 环境。需要先初始化：
+
+   ```bash
+   # 临时生效（当前终端），<安装路径> 替换为实际路径
+   source <安装路径>/etc/profile.d/conda.sh
+
+   # 永久生效（写入 bashrc，执行一次即可）
+   echo 'source <安装路径>/etc/profile.d/conda.sh' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+   > 默认安装路径示例：`~/miniforge3`（即 `C:\Users\<用户名>\miniforge3`）。
 
 ---
 
 ## 第二步：安装 motorbridge
 
+> **Windows 用户注意**：如果之前配置过 pip 的全局 `target` 路径，`pip install` 可能会装到错误的位置。
+> 安装前先检查：
+>
+> ```bash
+> python -m pip config list
+> ```
+>
+> 如果输出包含 `global.target=...`，需要编辑 `C:\Users\<你的用户名>\AppData\Roaming\pip\pip.ini`，
+> 在 `target` 行前加 `#` 注释掉，然后继续。
+
 ```bash
-pip install motorbridge
+pip install --force-reinstall --no-cache-dir motorbridge
 ```
 
 > 不锁定版本号，使用最新稳定版。安装完成后验证：
@@ -73,6 +126,14 @@ motorbridge-cli --help
 ```
 
 如果提示命令未找到，检查 Python Scripts 目录是否在 PATH 中。Windows 用户使用完整路径执行。
+
+> **写入 memory**：安装成功后，记录 motorbridge-cli 实际路径到 `memory/local-machine-env.md`：
+>
+> ```markdown
+> ## motorbridge
+> - CLI：`/f/miniforge/envs/rebot/Scripts/motorbridge-cli`
+> - 安装方式：conda rebot 环境中 pip install
+> ```
 
 ---
 
@@ -104,6 +165,12 @@ Windows 使用 PCAN-USB **不需要配置 can0 接口**。
 2. 插入 PCAN-USB 转接板
 3. 无需执行任何额外配置命令，直接使用 `motorbridge-cli` 即可
 
+> **写入 memory**：PCAN-USB 驱动安装完成后，更新 `memory/local-machine-env.md`：
+>
+> ```markdown
+> - PCAN-USB 驱动：已安装
+> ```
+
 ### Linux — damiao（USB 串口）
 
 1. 确认串口设备存在：
@@ -131,3 +198,9 @@ sudo usermod -aG dialout $USER
 1. 插入达妙电机 USB 串口线
 2. 在设备管理器中确认 COM 端口号
 3. 使用 `--serial-port COMx` 指定对应端口（如 `COM3`）
+
+> **写入 memory**：确认 COM 端口后，更新 `memory/local-machine-env.md`：
+>
+> ```markdown
+> - 达妙串口：COMx
+> ```

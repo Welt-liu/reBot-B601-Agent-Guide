@@ -19,10 +19,19 @@ motorbridge-cli --help 2>/dev/null || python -m motorbridge --help 2>/dev/null |
 
 ### Linux / macOS / Jetson / Raspberry Pi
 
+> Run these commands in **bash/zsh**.
+
 Install Miniforge:
 
 ```bash
 wget "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3-$(uname)-$(uname -m).sh
+```
+
+If `wget` is not available, use `curl` instead:
+
+```bash
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 bash Miniforge3-$(uname)-$(uname -m).sh
 ```
 
@@ -35,28 +44,43 @@ conda activate rebot
 
 ### Windows
 
-Windows users can choose one of the following:
+> Run these commands in **PowerShell**. If using Git Bash, replace `Invoke-WebRequest` with `curl` commands.
 
-**Option A: Using Miniforge (Recommended)**
+#### Using Miniforge (Recommended)
 
-1. Download the Windows installer from the [Miniforge releases page](https://github.com/conda-forge/miniforge/releases) and install
-2. Open Anaconda Prompt and run:
+1. Download and install Miniforge:
 
-```bash
-conda create -y -n rebot python=3.12
-conda activate rebot
-```
+   **PowerShell:**
 
-**Option B: Using Existing Python Installation**
+   ```powershell
+   Invoke-WebRequest -Uri "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe" -OutFile "Miniforge3-Windows-x86_64.exe"
+   ```
 
-If Python 3.10+ is already installed, you can use it directly. Verify:
+   **Git Bash / WSL:**
 
-```bash
-python --version
-```
+   ```bash
+   curl -L -o Miniforge3-Windows-x86_64.exe "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe"
+   ```
 
-Ensure the Python Scripts directory is in PATH, or use the full path in commands:
-`<Python_install_dir>\Scripts\motorbridge-cli.exe`
+2. Double-click the installer to complete installation, then open **Anaconda Prompt** (or any terminal with `conda`) and run:
+
+   ```bash
+   conda create -y -n rebot python=3.12
+   conda activate rebot
+   ```
+
+   **Git Bash users**: If `conda` is not found, Git Bash hasn't loaded the conda environment. Initialize it first:
+
+   ```bash
+   # Temporary (current terminal only), replace <install-path> with your actual path
+   source <install-path>/etc/profile.d/conda.sh
+
+   # Permanent (write to bashrc, run once)
+   echo 'source <install-path>/etc/profile.d/conda.sh' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+   > Default install path example: `~/miniforge3` (i.e. `C:\Users\<Username>\miniforge3`).
 
 ---
 

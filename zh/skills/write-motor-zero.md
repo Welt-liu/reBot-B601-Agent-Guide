@@ -5,24 +5,58 @@
 ## 使用前提
 
 - 已完成 `/write-motor-id`，电机 ID 已正确写入
-- `can0` 已配置且处于 UP 状态（第二步中已配置）
+- `can0` 已配置且处于 UP 状态（Linux 需在 `/setup-environment` 中配置）
 
 ## 步骤
 
 ### 1. 激活环境并启动 Gateway
+
+**Linux：**
 
 ```bash
 conda activate rebot
 motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can0
 ```
 
+**Windows（推荐路由模式）：**
+
+```bash
+conda activate rebot
+motorbridge-gateway -- --bind 127.0.0.1:9002
+```
+
+路由模式下仅需 `--bind`，web UI 会自动选择 vendor/channel/ID。如需指定通道，使用：
+
+```bash
+motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can0
+# 或带比特率
+motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can0@1000000
+```
+
+> **Windows `conda activate` 提示**：如果报错 "CommandNotFoundError"，说明 conda 未初始化当前 shell。
+> 使用 Miniforge Prompt 执行，或使用完整路径：`<miniforge安装路径>\Scripts\activate.bat rebot`。
+> Git Bash 用户参见 `/setup-environment` 中的初始化说明。
+
 Gateway 启动后保持运行，不要关闭该终端。
 
 > **重要：Gateway 会独占 CAN 总线**。在 Gateway 运行期间，`motorbridge-cli scan` 和其他 CLI 命令将无法与电机通信，会返回 `0 motor(s) found`。
 > 如需在 Gateway 运行期间扫描电机 ID，必须先停止 Gateway：
+>
 > ```bash
+> # Linux
 > pkill -f ws_gateway
 > ```
+>
+> ```cmd
+> :: Windows cmd
+> taskkill /F /IM motorbridge-gateway.exe
+> ```
+>
+> ```powershell
+> # PowerShell
+> Stop-Process -Name "motorbridge-gateway" -ErrorAction SilentlyContinue
+> ```
+>
 > 扫描完成后再重新启动 Gateway。建议在启动 Gateway 前完成所有 CLI 扫描和电机 ID 设置工作。
 
 ### 2. 打开 Motorbridge Studio
