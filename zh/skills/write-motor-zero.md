@@ -18,6 +18,13 @@ motorbridge-gateway -- --bind 127.0.0.1:9002 --transport socketcan --channel can
 
 Gateway 启动后保持运行，不要关闭该终端。
 
+> **重要：Gateway 会独占 CAN 总线**。在 Gateway 运行期间，`motorbridge-cli scan` 和其他 CLI 命令将无法与电机通信，会返回 `0 motor(s) found`。
+> 如需在 Gateway 运行期间扫描电机 ID，必须先停止 Gateway：
+> ```bash
+> pkill -f ws_gateway
+> ```
+> 扫描完成后再重新启动 Gateway。建议在启动 Gateway 前完成所有 CLI 扫描和电机 ID 设置工作。
+
 ### 2. 打开 Motorbridge Studio
 
 提示用户访问：https://motorbridge.github.io/motorbridge-studio/
