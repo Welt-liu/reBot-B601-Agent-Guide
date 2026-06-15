@@ -1,23 +1,29 @@
 # reBot B601-RS & B601-DM Workflow Guide
 
-> **Note: All Agent Skills are beta versions and for reference only. If you have any questions or encounter issues, please contact Seeed for support.**
+> **Note: All reference documents are beta versions and for reference only. If you have any questions or encounter issues, please contact Seeed for support.**
 
----
+To let the agent help you initialize the robotic arm, copy the prompt below and send it to your agent:
 
-## English
+## Quick Start
 
-[README](en/readme.md) — Getting started and usage guide
+### English
+
+```
+Please follow the workflow in AGENTS.md (https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/AGENTS.md) to help me initialize the robotic arm.
+```
 
 - [AGENTS Workflow](en/AGENTS.md) — Complete robotic arm initialization workflow
-- [环境初始化](en/references/setup-environment.md) — Environment initialization
-- [写入电机 ID](en/references/write-motor-id.md) — Write motor IDs
-- [零点校准](en/references/write-motor-zero.md) — Zero calibration
+- [Environment Setup](en/references/setup-environment.md) — Python, motorbridge, platform config
+- [Write Motor ID](en/references/write-motor-id.md) — Set motor IDs 1–7
+- [Zero Calibration](en/references/write-motor-zero.md) — Calibrate motor zero positions
 
-## 中文
+### 中文
 
-[说明文档](zh/readme.md) — 入门引导和使用方法
+```
+请参考 AGENTS.md（https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/AGENTS.md）中的流程，帮助用户完成新机械臂的初始化。
+```
 
 - [AGENTS 工作流](zh/AGENTS.md) — 机械臂初始化完整流程
-- [环境初始化](zh/references/setup-environment.md) — 环境初始化
-- [写入电机 ID](zh/references/write-motor-id.md) — 写入电机 ID
-- [零点校准](zh/references/write-motor-zero.md) — 零点校准
+- [环境初始化](zh/references/setup-environment.md) — Python、motorbridge、平台配置
+- [写入电机 ID](zh/references/write-motor-id.md) — 写入电机 ID 1–7
+- [零点校准](zh/references/write-motor-zero.md) — 校准电机零点

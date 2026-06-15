@@ -2,7 +2,15 @@
 
 > 本文档仅适用于 **B601-RS 机械臂**。
 > 除了需要用户给予权限的命令外，都由你在得到用户同意后执行，除了异常状况外，不要让用户自己转到终端处理。
-> 不要使用文档中没有提及的motorbridge-cli指令，因为那可能会启动电机导致意外发生。
+> 不要使用文档中没有提及的 motorbridge-cli 指令，因为那可能会启动电机导致意外发生。
+
+## 环境状态记录
+
+执行流程期间，检查并更新 `memory/local-machine-env.md` 记录当前机器的环境信息，避免重复初始化：
+
+- **初始化前**：先读取该文件，若已有 conda 路径、motorbridge 信息、电机配置等，可直接使用
+- **每步完成后**：按参考文档中的提示，将新信息追加到该文件
+- **文件不存在时**：跳过读取步骤，正常执行即可
 
 ## 快速开始
 
@@ -29,7 +37,7 @@
 motorbridge-cli --help
 ```
 
-> **Windows 用户**：不需要创建 conda 环境或配置 can0。使用已有 Python + pip install motorbridge 即可，安装完成后 `motorbridge-cli` 位于 Python 安装目录的 `Scripts` 文件夹下。
+> **Windows 用户**：使用 Miniforge 创建 conda 环境，不要使用系统 Python 直接 `pip install motorbridge`。不需要配置 can0。详见 [环境初始化参考](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/references/setup-environment.md)。
 
 ---
 
@@ -51,7 +59,7 @@ motorbridge-cli --help
 
 ## 第三步：校准零点
 
-参考 [零点校准文档](references/write-motor-zero.md)。
+参考 [零点校准文档](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/references/write-motor-zero.md)。
 
 该文档会引导你完成：
 

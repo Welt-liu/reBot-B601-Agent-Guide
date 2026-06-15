@@ -4,6 +4,14 @@
 > Except for commands that require explicit user permission, all steps are executed by the agent with your consent. In non-exceptional cases, do not ask the user to handle things manually in the terminal.
 > Do not use motorbridge-cli commands not mentioned in this document, as they may start the motors and cause unexpected behavior.
 
+## Environment State Tracking
+
+During the workflow, check and update `memory/local-machine-env.md` to record the current machine's environment, avoiding redundant initialization:
+
+- **Before starting**: Read this file — if conda paths, motorbridge info, or motor configuration already exist, you can skip those steps
+- **After each step**: Append new information as instructed in the reference documents
+- **If the file doesn't exist**: Skip the read step and proceed normally
+
 ## Quick Start
 
 Please confirm which form of robotic arm you have:
@@ -51,7 +59,7 @@ This reference guides you through:
 
 ## Step 3: Zero Calibration
 
-See the [Zero Calibration Reference](references/write-motor-zero.md).
+See the [Zero Calibration Reference](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/references/write-motor-zero.md).
 
 This reference guides you through:
 
