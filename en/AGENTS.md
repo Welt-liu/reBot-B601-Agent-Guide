@@ -29,7 +29,7 @@ After completion, verify motorbridge-cli is available:
 motorbridge-cli --help
 ```
 
-> **Windows users**: No need to create a conda environment or configure can0. Use existing Python + `pip install motorbridge`. The `motorbridge-cli` executable is located in the `Scripts` directory of your Python installation.
+> **Windows users**: Use Miniforge to create a conda environment — do not use system Python directly. No can0 configuration needed. See [Setup Environment Skill](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/skills/en/setup-environment.md) for details.
 
 ---
 

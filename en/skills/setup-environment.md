@@ -48,19 +48,25 @@ conda activate rebot
 
 #### Using Miniforge (Recommended)
 
-1. Download and install Miniforge:
+> **Note: Windows users should download Miniforge themselves — do not have the Agent download it for you.** The Agent environment (Git Bash) uses `curl` to download from GitHub at a very slow speed, even with a proxy.
 
-   **PowerShell:**
+1. **Download Miniforge** (choose one method):
+
+   **Method 1: PowerShell download (Recommended)**
 
    ```powershell
-   Invoke-WebRequest -Uri "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe" -OutFile "Miniforge3-Windows-x86_64.exe"
+   Invoke-WebRequest -Uri "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe" -OutFile "$env:USERPROFILE\Downloads\Miniforge3-Windows-x86_64.exe"
    ```
 
-   **Git Bash / WSL:**
+   **Method 2: Browser download**
 
-   ```bash
-   curl -L -o Miniforge3-Windows-x86_64.exe "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe"
+   Open the Miniforge Release page in your browser, find the latest `Miniforge3-Windows-x86_64.exe` and download:
+
+   ```text
+   https://github.com/conda-forge/miniforge/releases
    ```
+
+   > Do not use the system Python (e.g. `C:\Python314\python`) to directly `pip install motorbridge`, as this may fail. You must use a conda virtual environment created by Miniforge.
 
 2. Double-click the installer to complete installation, then open **Anaconda Prompt** (or any terminal with `conda`) and run:
 

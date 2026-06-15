@@ -33,10 +33,13 @@ Before proceeding, identify which protocol the motors use:
 All commands below use `motorbridge-cli` as the command name. In practice:
 
 - **Linux/macOS** (conda environment activated): run `motorbridge-cli` directly
-- **Windows** (system Python): replace with the full path, e.g.:
+- **Windows** (conda environment not in PATH): use the full path, e.g.:
+
   ```
-  <Python_install_dir>\Scripts\motorbridge-cli.exe
+  <miniforge_path>\envs\rebot\Scripts\motorbridge-cli.exe
   ```
+
+  Or run `conda activate rebot` first, then use `motorbridge-cli` directly.
 
 ---
 
@@ -141,14 +144,15 @@ Ensure the user has **only one motor connected** before proceeding.
 
 > **Scan strategy: scan both factory default range and 1–7 range simultaneously.** Some batches ship with IDs pre-set to 1–7 rather than the default 127.
 
-**robstride:**
-```bash
-# First scan 1–7 (may be pre-set)
-motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 300
+**robstride (Linux / Windows, same command):**
 
-# Then scan 126–127 (factory default)
+```bash
+# Scan both ranges simultaneously to determine motor status
+motorbridge-cli scan --vendor robstride --channel can0 --start-id 1 --end-id 7 --timeout-ms 300
 motorbridge-cli scan --vendor robstride --channel can0 --start-id 126 --end-id 127 --timeout-ms 300
 ```
+
+> On Windows, `--channel can0` is still required — the PCAN driver maps it automatically at the lower level. No can0 interface configuration is needed beforehand.
 
 **damiao:**
 ```bash
@@ -211,14 +215,14 @@ verify ok
 Immediately after modification, scan to confirm:
 
 ```bash
-# robstride: scan for the new ID
+# robstride: scan both old and new ID
 motorbridge-cli scan --vendor robstride --channel can0 --start-id <new_id> --end-id <new_id> --timeout-ms 300
 
 # damiao: same, with transport parameters
 ```
 
 - If new ID hits and old ID doesn't respond → modification successful
-- If old ID still responds → modification failed, re-run `id-set`
+- If old ID still hits → modification failed, re-run `id-set`
 
 ---
 
