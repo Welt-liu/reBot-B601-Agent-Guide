@@ -9,7 +9,7 @@ To let the agent help you initialize the robotic arm, copy the prompt below and 
 ### English
 
 ```
-Please follow the workflow in AGENTS.md (https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/AGENTS.md) to help me initialize the robotic arm.
+Please follow the workflow in AGENTS.md (https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/en/AGENTS.md) to help me initialize the robotic arm.
 ```
 
 - [AGENTS Workflow](en/AGENTS.md) — Complete robotic arm initialization workflow
@@ -20,7 +20,7 @@ Please follow the workflow in AGENTS.md (https://github.com/Welt-liu/reBot-B601-
 ### 中文
 
 ```
-请参考 AGENTS.md（https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/AGENTS.md）中的流程，帮助用户完成新机械臂的初始化。
+请参考 AGENTS.md（https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/zh/AGENTS.md）中的流程，帮助用户完成新机械臂的初始化。
 ```
 
 - [AGENTS 工作流](zh/AGENTS.md) — 机械臂初始化完整流程

@@ -25,7 +25,7 @@ Please confirm which form of robotic arm you have:
 
 ## Step 1: Environment Initialization
 
-See [Environment Setup Reference](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/references/setup-environment.md) to complete the following:
+See [Environment Setup Reference](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/en/references/setup-environment.md) to complete the following:
 
 - [ ] Python environment setup (Miniforge or existing Python)
 - [ ] motorbridge installation
@@ -37,13 +37,13 @@ After completion, verify motorbridge-cli is available:
 motorbridge-cli --help
 ```
 
-> **Windows users**: Use Miniforge to create a conda environment — do not use system Python directly. No can0 configuration needed. See [Environment Setup Reference](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/references/setup-environment.md) for details.
+> **Windows users**: Use Miniforge to create a conda environment — do not use system Python directly. No can0 configuration needed. See [Environment Setup Reference](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/en/references/setup-environment.md) for details.
 
 ---
 
 ## Step 2: Write Motor IDs
 
-See [Write Motor ID Reference](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/references/write-motor-id.md)
+See [Write Motor ID Reference](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/en/references/write-motor-id.md)
 
 This reference guides you through:
 
@@ -59,7 +59,7 @@ This reference guides you through:
 
 ## Step 3: Zero Calibration
 
-See the [Zero Calibration Reference](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/en/references/write-motor-zero.md).
+See the [Zero Calibration Reference](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/en/references/write-motor-zero.md).
 
 This reference guides you through:
 

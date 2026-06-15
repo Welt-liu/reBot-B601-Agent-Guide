@@ -25,7 +25,7 @@
 
 ## 第一步：环境初始化
 
-运行 [环境初始化参考](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/references/setup-environment.md) 完成以下安装：
+运行 [环境初始化参考](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/zh/references/setup-environment.md) 完成以下安装：
 
 - [ ] Python 环境准备（Miniforge 或已有 Python）
 - [ ] motorbridge 安装
@@ -37,13 +37,13 @@
 motorbridge-cli --help
 ```
 
-> **Windows 用户**：使用 Miniforge 创建 conda 环境，不要使用系统 Python 直接 `pip install motorbridge`。不需要配置 can0。详见 [环境初始化参考](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/references/setup-environment.md)。
+> **Windows 用户**：使用 Miniforge 创建 conda 环境，不要使用系统 Python 直接 `pip install motorbridge`。不需要配置 can0。详见 [环境初始化参考](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/zh/references/setup-environment.md)。
 
 ---
 
 ## 第二步：写入电机 ID
 
-运行 [写入电机ID参考](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/references/write-motor-id.md)
+运行 [写入电机ID参考](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/zh/references/write-motor-id.md)
 
 该参考文档会引导你完成：
 
@@ -59,7 +59,7 @@ motorbridge-cli --help
 
 ## 第三步：校准零点
 
-参考 [零点校准文档](https://github.com/Welt-liu/reBot-B601-RS-Skills/blob/main/zh/references/write-motor-zero.md)。
+参考 [零点校准文档](https://github.com/Welt-liu/reBot-B601-Agent-Guide/blob/main/zh/references/write-motor-zero.md)。
 
 该文档会引导你完成：
 
