@@ -25,7 +25,7 @@ motorbridge-cli --help *>&1 | Out-Null; if ($LASTEXITCODE -ne 0) { python -m mot
 
 ## 第一步：准备 Python 环境
 
-### Linux / macOS / Jetson / 树莓派
+### Linux / Jetson / 树莓派
 
 > 以下命令在 **bash/zsh** 中执行。
 
@@ -41,6 +41,26 @@ bash Miniforge3-$(uname)-$(uname -m).sh
 ```bash
 curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 bash Miniforge3-$(uname)-$(uname -m).sh
+```
+
+创建并激活虚拟环境：
+
+```bash
+conda create -y -n rebot python=3.12
+conda activate rebot
+```
+
+### macOS
+
+> 以下命令在 **bash/zsh** 中执行。
+>
+> **注意**：macOS 下 `$(uname)` 返回 `Darwin`，但 Miniforge 安装包使用 `MacOSX`，因此 URL 需显式指定。
+
+安装 Miniforge：
+
+```bash
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-$(uname -m).sh"
+bash Miniforge3-MacOSX-$(uname -m).sh
 ```
 
 创建并激活虚拟环境：
@@ -171,6 +191,43 @@ sudo ip link set can0 up
 # 确认状态
 ip -br link show can0
 ```
+
+### macOS — robstride（USB-CAN）
+
+macOS 使用 PCAN-USB **不需要配置 can0 接口**，但需要安装 PCBUSB 运行时库（`libPCBUSB.dylib`）。
+
+1. 安装 PCBUSB 库：
+
+```bash
+curl -L -o macOS_Library_for_PCANUSB_v0.13.tar.gz \
+  https://raw.githubusercontent.com/tianrking/motorbridge/main/third_party/pcan/macos/macOS_Library_for_PCANUSB_v0.13.tar.gz
+tar -xzf macOS_Library_for_PCANUSB_v0.13.tar.gz
+cd PCBUSB
+sudo ./install.sh
+```
+
+2. 将 PCBUSB 库链接到 conda 环境，确保 motorbridge 可以找到：
+
+```bash
+ln -s /usr/local/lib/libPCBUSB.dylib "$CONDA_PREFIX/lib/PCBUSB"
+```
+
+3. 验证安装是否就绪：
+
+```bash
+# 检查 Python 包和 CLI 是否就绪
+python -c "import motorbridge; print('motorbridge OK')"
+motorbridge-cli --help
+
+# 可选：检查 PCBUSB 运行时是否可加载
+python -c "import ctypes; ctypes.CDLL('libPCBUSB.dylib'); print('PCBUSB load OK')"
+```
+
+> **写入 memory**：安装完成后，更新 `../memory/local-machine-env.md`：
+>
+> ```markdown
+> - PCBUSB 库：已安装（macOS）
+> ```
 
 ### Windows — robstride（USB-CAN）
 

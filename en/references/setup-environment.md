@@ -2,22 +2,30 @@
 
 > **Note: This reference document is a beta version and for reference only. If you have any questions or encounter issues, please contact Seeed for support.**
 
+## Before You Begin
+
+Before starting, check `../memory/local-machine-env.md` to see if the current machine's environment configuration already exists. If conda path and motorbridge info are already recorded, you can use them directly; if not, or if the information is incomplete, follow the steps below to re-initialize.
+
 ## Step 0: Check for Existing Installation
 
 Before starting, check whether motorbridge is already installed:
 
 ```bash
+# Linux / macOS / Git Bash:
 motorbridge-cli --help 2>/dev/null || python -m motorbridge --help 2>/dev/null || echo "motorbridge not installed"
+
+# Windows PowerShell (no 2>/dev/null):
+motorbridge-cli --help *>&1 | Out-Null; if ($LASTEXITCODE -ne 0) { python -m motorbridge *>&1 | Out-Null; if ($LASTEXITCODE -ne 0) { echo "motorbridge not installed" } }
 ```
 
-- If help text is displayed, motorbridge is **already installed** — skip to the next steps
-- If `motorbridge not installed` is shown, proceed with the steps below
+- If help text is displayed, motorbridge is **already installed** — skip Step 1 and Step 2, proceed directly to the next steps
+- If `motorbridge not installed` is shown, continue with the steps below
 
 ---
 
 ## Step 1: Prepare Python Environment
 
-### Linux / macOS / Jetson / Raspberry Pi
+### Linux / Jetson / Raspberry Pi
 
 > Run these commands in **bash/zsh**.
 
@@ -33,6 +41,26 @@ If `wget` is not available, use `curl` instead:
 ```bash
 curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 bash Miniforge3-$(uname)-$(uname -m).sh
+```
+
+Create and activate a virtual environment:
+
+```bash
+conda create -y -n rebot python=3.12
+conda activate rebot
+```
+
+### macOS
+
+> Run these commands in **bash/zsh**.
+>
+> **Note**: On macOS, `$(uname)` returns `Darwin`, but Miniforge installers use `MacOSX`. The URL must specify it explicitly.
+
+Install Miniforge:
+
+```bash
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-$(uname -m).sh"
+bash Miniforge3-MacOSX-$(uname -m).sh
 ```
 
 Create and activate a virtual environment:
@@ -68,12 +96,23 @@ conda activate rebot
 
    > Do not use the system Python (e.g. `C:\Python314\python`) to directly `pip install motorbridge`, as this may fail. You must use a conda virtual environment created by Miniforge.
 
-2. Double-click the installer to complete installation, then open **Anaconda Prompt** (or any terminal with `conda`) and run:
+2. Double-click the installer to complete installation, then open **Anaconda Prompt** (or Miniforge Prompt), create and activate the virtual environment:
+
+> **Write to memory**: After installation, record the actual Miniforge install path to `../memory/local-machine-env.md`:
+>
+> ```markdown
+> ## conda
+> - Install path: `F:\miniforge` (Git Bash: `/f/miniforge`)
+> - conda.sh: `/f/miniforge/etc/profile.d/conda.sh`
+> ```
 
    ```bash
-   conda create -y -n rebot python=3.12
+   conda create -y -n rebot python=3.12 --no-shortcuts
    conda activate rebot
    ```
+
+   > If `conda activate` fails with "CommandNotFoundError: Your shell has not been properly configured",
+   > run `conda init cmd.exe` (or `conda init powershell`) first, then restart the terminal and activate again.
 
    **Git Bash users**: If `conda` is not found, Git Bash hasn't loaded the conda environment. Initialize it first:
 
@@ -101,8 +140,18 @@ conda activate rebot
 
 ## Step 2: Install motorbridge
 
+> **Windows users**: If you have previously configured a global `target` path for pip, `pip install` may install to the wrong location.
+> Check first:
+>
+> ```bash
+> python -m pip config list
+> ```
+>
+> If the output includes `global.target=...`, edit `C:\Users\<YourUsername>\AppData\Roaming\pip\pip.ini`,
+> add a `#` before the `target` line to comment it out, then continue.
+
 ```bash
-pip install motorbridge
+pip install --force-reinstall --no-cache-dir motorbridge
 ```
 
 > Do not pin to a specific version — use the latest stable release. After installation, verify:
@@ -112,6 +161,14 @@ motorbridge-cli --help
 ```
 
 If the command is not found, check whether the Python Scripts directory is in PATH. Windows users should use the full path.
+
+> **Write to memory**: After successful installation, record the actual motorbridge-cli path to `../memory/local-machine-env.md`:
+>
+> ```markdown
+> ## motorbridge
+> - CLI: `/f/miniforge/envs/rebot/Scripts/motorbridge-cli`
+> - Installation: pip install in conda rebot environment
+> ```
 
 ---
 
@@ -135,6 +192,43 @@ sudo ip link set can0 up
 ip -br link show can0
 ```
 
+### macOS — robstride (USB-CAN)
+
+macOS uses PCAN-USB — **no can0 configuration needed**, but the PCBUSB runtime library (`libPCBUSB.dylib`) must be installed.
+
+1. Install the PCBUSB library:
+
+```bash
+curl -L -o macOS_Library_for_PCANUSB_v0.13.tar.gz \
+  https://raw.githubusercontent.com/tianrking/motorbridge/main/third_party/pcan/macos/macOS_Library_for_PCANUSB_v0.13.tar.gz
+tar -xzf macOS_Library_for_PCANUSB_v0.13.tar.gz
+cd PCBUSB
+sudo ./install.sh
+```
+
+2. Link the PCBUSB library into the conda environment so motorbridge can find it:
+
+```bash
+ln -s /usr/local/lib/libPCBUSB.dylib "$CONDA_PREFIX/lib/PCBUSB"
+```
+
+3. Verify the installation:
+
+```bash
+# Check Python package and CLI
+python -c "import motorbridge; print('motorbridge OK')"
+motorbridge-cli --help
+
+# Optional: check that the PCBUSB runtime can be loaded
+python -c "import ctypes; ctypes.CDLL('libPCBUSB.dylib'); print('PCBUSB load OK')"
+```
+
+> **Write to memory**: After installation, update `../memory/local-machine-env.md`:
+>
+> ```markdown
+> - PCBUSB library: installed (macOS)
+> ```
+
 ### Windows — robstride (USB-CAN)
 
 Windows uses the PCAN-USB driver directly — **no can0 configuration needed**.
@@ -143,13 +237,42 @@ Windows uses the PCAN-USB driver directly — **no can0 configuration needed**.
 2. Plug in the PCAN-USB adapter
 3. No additional configuration required — use `motorbridge-cli` directly
 
+> **Write to memory**: After installing the PCAN-USB driver, update `../memory/local-machine-env.md`:
+>
+> ```markdown
+> - PCAN-USB driver: installed
+> ```
+
 ### Linux — damiao (USB serial)
 
-1. Confirm the serial device exists: `ls -l /dev/ttyACM0`
-2. Confirm the user is in the `dialout` group: `groups`
-3. If not in the group: `sudo usermod -aG dialout $USER` (requires re-login to take effect)
+1. Confirm the serial device exists:
+
+```bash
+ls -l /dev/ttyACM0
+```
+
+2. Check permissions. The output should be `crw-rw----` with group `dialout`. Verify the current user is in the group:
+
+```bash
+groups
+```
+
+If the output does not include `dialout`, run:
+
+```bash
+sudo usermod -aG dialout $USER
+```
+
+> After joining the group, you need to **log out and log back in** (or reboot) for it to take effect. After re-login, confirm again that `groups` output includes `dialout`, otherwise the serial port will be inaccessible.
 
 ### Windows — damiao (USB serial)
 
-1. Confirm the COM port number in Device Manager
-2. Use `--serial-port COMx` in subsequent commands (e.g. `COM3`)
+1. Plug in the damiao motor USB serial cable
+2. Confirm the COM port number in Device Manager
+3. Use `--serial-port COMx` to specify the corresponding port (e.g. `COM3`)
+
+> **Write to memory**: After confirming the COM port, update `../memory/local-machine-env.md`:
+>
+> ```markdown
+> - damiao serial port: COMx
+> ```
